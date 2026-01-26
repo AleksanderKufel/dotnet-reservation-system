@@ -1,3 +1,7 @@
 <Solution>
-  <Project Path="ReservationSystem/ReservationSystem.csproj" />
+  <Project Path="ReservationSystem.Application/ReservationSystem.Application.csproj" />
+  <Project Path="ReservationSystem.Domain/ReservationSystem.Domain.csproj" />
+  <Project Path="ReservationSystem.Infrastructure/ReservationSystem.Infrastructure.csproj" />
+  <Project Path="ReservationSystem.Tests/ReservationSystem.Tests.csproj" />
+  <Project Path="ReservationSystem/ReservationSystem.Api.csproj" />
 </Solution>
