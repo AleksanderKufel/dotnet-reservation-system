@@ -1,17 +1,46 @@
+using Microsoft.EntityFrameworkCore;
+using ReservationSystem.Application.Interfaces;
+using ReservationSystem.Application.Services;
+using ReservationSystem.Domain.Services;
+using ReservationSystem.Infrastructure.Persistence;
+using ReservationSystem.Infrastructure.Repositories;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// =======================
+// Services
+// =======================
 
+// DbContext (InMemory na dev)
+builder.Services.AddDbContext<ReservationDbContext>(options =>
+    options.UseInMemoryDatabase("ReservationDb"));
+
+// Infrastructure
+builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
+
+// Application
+builder.Services.AddScoped<ReservationService>();
+
+// Domain
+builder.Services.AddScoped<ReservationConflictChecker>();
+
+// Controllers
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+
+// Swagger
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// =======================
+// Middleware
+// =======================
+
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
