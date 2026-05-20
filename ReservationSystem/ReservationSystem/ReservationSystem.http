@@ -1,6 +1,13 @@
-@ReservationSystem_HostAddress = http://localhost:5143
+@host = http://localhost:5143/api/reservations
 
-GET {{ReservationSystem_HostAddress}}/weatherforecast/
-Accept: application/json
 
-###
+### Create reservation
+POST {{host}}
+Content-Type: application/json
+
+{
+  "specialistId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "userId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "startTime": "2026a05-20T10:00:00Z",
+  "endTime": "2026-05-20T11:00:00Z"
+}

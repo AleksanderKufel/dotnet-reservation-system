@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using ReservationSystem.API.Exceptions;
 using ReservationSystem.Application.Interfaces;
 using ReservationSystem.Application.Services;
 using ReservationSystem.Domain.Services;
@@ -7,41 +8,61 @@ using ReservationSystem.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// =======================
-// Services
-// =======================
+// ======================================================
+// Database
+// ======================================================
 
-// DbContext (InMemory na dev)
 builder.Services.AddDbContext<ReservationDbContext>(options =>
-    options.UseInMemoryDatabase("ReservationDb"));
+{
+    options.UseInMemoryDatabase("ReservationDb");
+});
 
+// ======================================================
 // Infrastructure
+// ======================================================
+
 builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
 
-// Application
-builder.Services.AddScoped<ReservationService>();
-
+// ======================================================
 // Domain
+// ======================================================
+
 builder.Services.AddScoped<ReservationConflictChecker>();
 
-// Controllers
+// ======================================================
+// Application
+// ======================================================
+
+builder.Services.AddScoped<ReservationService>();
+
+// ======================================================
+// API / Framework
+// ======================================================
+
 builder.Services.AddControllers();
 
-// Swagger
+builder.Services.AddProblemDetails();
+
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// =======================
-// Middleware
-// =======================
+// ======================================================
+// Middleware pipeline
+// ======================================================
 
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
+
     app.UseSwaggerUI();
 }
+
+app.UseExceptionHandler();
 
 app.UseHttpsRedirection();
 
