@@ -16,21 +16,15 @@ public class ReservationsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(CreateReservationRequest request)
+    public async Task<IActionResult> Create(CreateReservationRequest request, CancellationToken cancellationToken)
     {
-        try
-        {
-            await _reservationService.CreateReservationAsync(
-                request.SpecialistId,
-                request.UserId,
-                request.StartTime,
-                request.EndTime);
 
-            return Created(string.Empty, null);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        await _reservationService.CreateReservationAsync(
+            request.SpecialistId,
+            request.UserId,
+            request.StartTime,
+            request.EndTime,
+            cancellationToken);
+        return Created(string.Empty, null);
     }
 }

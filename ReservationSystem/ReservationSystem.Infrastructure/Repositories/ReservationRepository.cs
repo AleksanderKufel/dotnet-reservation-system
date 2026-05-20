@@ -18,7 +18,8 @@ public class ReservationRepository : IReservationRepository
     public async Task<IReadOnlyList<Reservation>> GetActiveForSpecialistAsync(
         Guid specialistId,
         DateTime from,
-        DateTime to)
+        DateTime to, 
+        CancellationToken cancellationToken = default)
     {
         return await _dbContext.Reservations
             .Where(r =>
@@ -26,12 +27,12 @@ public class ReservationRepository : IReservationRepository
                 r.Status == ReservationStatus.Active &&
                 r.StartTime < to &&
                 r.EndTime > from)
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
     }
 
-    public async Task AddAsync(Reservation reservation)
+    public async Task AddAsync(Reservation reservation, CancellationToken cancellationToken = default)
     {
-        await _dbContext.Reservations.AddAsync(reservation);
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.Reservations.AddAsync(reservation, cancellationToken);
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 }
