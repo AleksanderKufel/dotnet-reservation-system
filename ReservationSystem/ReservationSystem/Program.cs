@@ -1,5 +1,8 @@
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using ReservationSystem.API.Exceptions;
+using ReservationSystem.API.Validators;
 using ReservationSystem.Application.Interfaces;
 using ReservationSystem.Application.Services;
 using ReservationSystem.Domain.Services;
@@ -44,6 +47,12 @@ builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
+builder.Services.AddFluentValidationAutoValidation();
+
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+
+ValidatorOptions.Global.LanguageManager.Enabled = false;
 
 builder.Services.AddEndpointsApiExplorer();
 
