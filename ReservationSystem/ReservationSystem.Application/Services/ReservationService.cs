@@ -21,12 +21,14 @@ public class ReservationService
         Guid specialistId,
         Guid userId,
         DateTime startTime,
-        DateTime endTime)
+        DateTime endTime,
+        CancellationToken cancellationToken = default)
     {
         var existingReservations = await _repository.GetActiveForSpecialistAsync(
             specialistId,
             startTime,
-            endTime);
+            endTime,
+            cancellationToken);
 
         var reservation = new Reservation(
             specialistId,
@@ -37,6 +39,6 @@ public class ReservationService
         if (_conflictChecker.HasConflict(reservation, existingReservations))
             throw new InvalidOperationException("Reservation time conflict.");
 
-        await _repository.AddAsync(reservation);
+        await _repository.AddAsync(reservation, cancellationToken);
     }
 }
