@@ -1,9 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using ReservationSystem.Domain.Entities;
+using ReservationSystem.Infrastructure.Identity;
 
 namespace ReservationSystem.Infrastructure.Persistence;
 
-public class ReservationDbContext : DbContext
+public class ReservationDbContext : IdentityDbContext<User>
 {
     public ReservationDbContext(DbContextOptions<ReservationDbContext> options)
         : base(options)

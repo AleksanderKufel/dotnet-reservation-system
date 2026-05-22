@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using ReservationSystem.Api.Contracts;
 using ReservationSystem.Application.Services;
 
 namespace ReservationSystem.Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/reservations")]
 public class ReservationsController : ControllerBase
