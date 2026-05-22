@@ -7,13 +7,16 @@ namespace ReservationSystem.Application.Services;
 public class ReservationService
 {
     private readonly IReservationRepository _repository;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly ReservationConflictChecker _conflictChecker;
 
     public ReservationService(
         IReservationRepository repository,
+        IUnitOfWork unitOfWork,
         ReservationConflictChecker conflictChecker)
     {
         _repository = repository;
+        _unitOfWork = unitOfWork;
         _conflictChecker = conflictChecker;
     }
 
@@ -24,21 +27,35 @@ public class ReservationService
         DateTime endTime,
         CancellationToken cancellationToken = default)
     {
-        var existingReservations = await _repository.GetActiveForSpecialistAsync(
-            specialistId,
-            startTime,
-            endTime,
-            cancellationToken);
+        try
+        {
+            await _unitOfWork.BeginSerializableTransactionAsync(cancellationToken);
 
-        var reservation = new Reservation(
-            specialistId,
-            userId,
-            startTime,
-            endTime);
+            var existingReservations = await _repository.GetActiveForSpecialistAsync(
+                specialistId,
+                startTime,
+                endTime,
+                cancellationToken);
 
-        if (_conflictChecker.HasConflict(reservation, existingReservations))
-            throw new InvalidOperationException("Reservation time conflict.");
+            var reservation = new Reservation(
+                specialistId,
+                userId,
+                startTime,
+                endTime);
 
-        await _repository.AddAsync(reservation, cancellationToken);
+            if (_conflictChecker.HasConflict(reservation, existingReservations))
+                throw new InvalidOperationException("Reservation time conflict.");
+
+            await _repository.AddAsync(reservation, cancellationToken);
+
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            await _unitOfWork.CommitAsync(cancellationToken);
+        }
+        catch
+        {
+            await _unitOfWork.RollbackAsync();
+            throw;
+        }
     }
 }

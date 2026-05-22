@@ -24,6 +24,8 @@ builder.Services.AddDbContext<ReservationDbContext>(options =>
 // Infrastructure
 // ======================================================
 
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
 builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
 
 // ======================================================
