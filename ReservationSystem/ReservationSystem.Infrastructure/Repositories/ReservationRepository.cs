@@ -33,6 +33,5 @@ public class ReservationRepository : IReservationRepository
     public async Task AddAsync(Reservation reservation, CancellationToken cancellationToken = default)
     {
         await _dbContext.Reservations.AddAsync(reservation, cancellationToken);
-        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 }
