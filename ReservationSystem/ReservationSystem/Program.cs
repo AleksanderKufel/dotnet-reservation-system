@@ -6,6 +6,7 @@ using ReservationSystem.API.Validators;
 using ReservationSystem.Application.Interfaces;
 using ReservationSystem.Application.Services;
 using ReservationSystem.Domain.Services;
+using ReservationSystem.Infrastructure.Identity;
 using ReservationSystem.Infrastructure.Persistence;
 using ReservationSystem.Infrastructure.Repositories;
 
@@ -25,6 +26,10 @@ builder.Services.AddDbContext<ReservationDbContext>(options =>
 // ======================================================
 
 builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
+
+builder.Services
+    .AddIdentityApiEndpoints<User>()
+    .AddEntityFrameworkStores<ReservationDbContext>();
 
 // ======================================================
 // Domain
@@ -75,7 +80,11 @@ app.UseExceptionHandler();
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
+
 app.UseAuthorization();
+
+app.MapIdentityApi<User>();
 
 app.MapControllers();
 
