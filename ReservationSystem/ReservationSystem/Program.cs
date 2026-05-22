@@ -17,9 +17,8 @@ var builder = WebApplication.CreateBuilder(args);
 // ======================================================
 
 builder.Services.AddDbContext<ReservationDbContext>(options =>
-{
-    options.UseInMemoryDatabase("ReservationDb");
-});
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 
 // ======================================================
 // Infrastructure
