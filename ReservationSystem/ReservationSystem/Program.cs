@@ -1,5 +1,6 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using FluentValidation.Validators;
 using Microsoft.EntityFrameworkCore;
 using ReservationSystem.API.Exceptions;
 using ReservationSystem.API.Validators;
@@ -48,6 +49,9 @@ builder.Services.AddScoped<ReservationService>();
 // API / Framework
 // ======================================================
 
+builder.Services.AddHealthChecks()
+    .AddNpgSql(builder.Configuration.GetConnectionString("DefaultConnection"));
+
 builder.Services.AddControllers();
 
 builder.Services.AddProblemDetails();
@@ -86,6 +90,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapIdentityApi<User>();
+
+app.MapHealthChecks("/health");
 
 app.MapControllers();
 

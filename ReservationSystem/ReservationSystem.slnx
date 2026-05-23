@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="docker-compose.yml" />
+  </Folder>
   <Project Path="ReservationSystem.Application/ReservationSystem.Application.csproj" />
   <Project Path="ReservationSystem.Domain/ReservationSystem.Domain.csproj" />
   <Project Path="ReservationSystem.Infrastructure/ReservationSystem.Infrastructure.csproj" />
