@@ -14,6 +14,7 @@ public class ReservationServiceTests
     {
         // Arrange
         var repositoryMock = new Mock<IReservationRepository>();
+        var unitOfWorkMock = CreateUnitOfWorkMock();
         repositoryMock
             .Setup(r => r.GetActiveForSpecialistAsync(
                 It.IsAny<Guid>(),
@@ -24,6 +25,7 @@ public class ReservationServiceTests
         var conflictChecker = new ReservationConflictChecker();
         var service = new ReservationService(
             repositoryMock.Object,
+            unitOfWorkMock.Object,
             conflictChecker);
 
         // Act
@@ -37,6 +39,7 @@ public class ReservationServiceTests
         repositoryMock.Verify(
             r => r.AddAsync(It.IsAny<Reservation>()),
             Times.Once);
+        unitOfWorkMock.Verify(u => u.RollbackAsync(), Times.Never);
     }
 
     [Fact]
@@ -52,6 +55,7 @@ public class ReservationServiceTests
             now.AddDays(1).AddHours(1));
 
         var repositoryMock = new Mock<IReservationRepository>();
+        var unitOfWorkMock = CreateUnitOfWorkMock();
         repositoryMock
             .Setup(r => r.GetActiveForSpecialistAsync(
                 It.IsAny<Guid>(),
@@ -62,6 +66,7 @@ public class ReservationServiceTests
         var conflictChecker = new ReservationConflictChecker();
         var service = new ReservationService(
             repositoryMock.Object,
+            unitOfWorkMock.Object,
             conflictChecker);
 
         // Act & Assert
@@ -75,5 +80,25 @@ public class ReservationServiceTests
         repositoryMock.Verify(
             r => r.AddAsync(It.IsAny<Reservation>()),
             Times.Never);
+        unitOfWorkMock.Verify(u => u.RollbackAsync(), Times.Once);
+    }
+
+    private Mock<IUnitOfWork> CreateUnitOfWorkMock()
+    {
+        var mock = new Mock<IUnitOfWork>();
+
+        mock.Setup(u => u.BeginSerializableTransactionAsync(It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        mock.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        mock.Setup(u => u.CommitAsync(It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        mock.Setup(u => u.RollbackAsync())
+            .Returns(Task.CompletedTask);
+
+        return mock;
     }
 }
