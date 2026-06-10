@@ -5,7 +5,7 @@ using System.Text;
 
 namespace ReservationSystem.Infrastructure.Identity
 {
-    public class User : IdentityUser
+    public class User : IdentityUser<Guid>
 
     {
     }
