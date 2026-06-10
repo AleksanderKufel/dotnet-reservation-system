@@ -11,9 +11,6 @@ public class CreateReservationRequestValidator
         RuleFor(x => x.SpecialistId)
             .NotEmpty();
 
-        RuleFor(x => x.UserId)
-            .NotEmpty();
-
         RuleFor(x => x.StartTime)
             .GreaterThan(DateTime.UtcNow);
 
