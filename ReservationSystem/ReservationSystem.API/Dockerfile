@@ -4,12 +4,12 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
-COPY ["ReservationSystem.API/ReservationSystem.API.csproj", "ReservationSystem.API/"]
+COPY ["ReservationSystem.API/ReservationSystem.Api.csproj", "ReservationSystem.API/"]
 COPY ["ReservationSystem.Infrastructure/ReservationSystem.Infrastructure.csproj", "ReservationSystem.Infrastructure/"]
 COPY ["ReservationSystem.Application/ReservationSystem.Application.csproj", "ReservationSystem.Application/"]
 COPY ["ReservationSystem.Domain/ReservationSystem.Domain.csproj", "ReservationSystem.Domain/"]
 
-RUN dotnet restore "ReservationSystem.API/ReservationSystem.API.csproj"
+RUN dotnet restore "ReservationSystem.API/ReservationSystem.Api.csproj"
 
 COPY . .
 WORKDIR "/src/ReservationSystem.API"
@@ -21,4 +21,4 @@ WORKDIR /app
 COPY --from=build /app/publish .
 
 EXPOSE 8080
-ENTRYPOINT ["dotnet", "ReservationSystem.API.dll"]
+ENTRYPOINT ["dotnet", "ReservationSystem.Api.dll"]
