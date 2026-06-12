@@ -1,9 +1,10 @@
-﻿using Moq;
+﻿using Microsoft.EntityFrameworkCore.Storage;
+using Moq;
+using ReservationSystem.Application.Exceptions;
 using ReservationSystem.Application.Interfaces;
 using ReservationSystem.Application.Services;
 using ReservationSystem.Domain.Entities;
 using ReservationSystem.Domain.Services;
-using Xunit;
 
 namespace ReservationSystem.Tests.Application;
 
@@ -13,22 +14,28 @@ public class ReservationServiceTests
     public async Task CreateReservationAsync_ShouldAddReservation_WhenNoConflict()
     {
         // Arrange
+
         var repositoryMock = new Mock<IReservationRepository>();
+
         var unitOfWorkMock = CreateUnitOfWorkMock();
+
         repositoryMock
             .Setup(r => r.GetActiveForSpecialistAsync(
                 It.IsAny<Guid>(),
                 It.IsAny<DateTime>(),
-                It.IsAny<DateTime>()))
-            .ReturnsAsync(new List<Reservation>());
+                It.IsAny<DateTime>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
 
         var conflictChecker = new ReservationConflictChecker();
+
         var service = new ReservationService(
             repositoryMock.Object,
             unitOfWorkMock.Object,
             conflictChecker);
 
         // Act
+
         await service.CreateReservationAsync(
             Guid.NewGuid(),
             Guid.NewGuid(),
@@ -36,69 +43,96 @@ public class ReservationServiceTests
             DateTime.UtcNow.AddDays(1).AddHours(1));
 
         // Assert
+
         repositoryMock.Verify(
-            r => r.AddAsync(It.IsAny<Reservation>()),
+            r => r.AddAsync(
+                It.IsAny<Reservation>(),
+                It.IsAny<CancellationToken>()),
             Times.Once);
-        unitOfWorkMock.Verify(u => u.RollbackAsync(), Times.Never);
+
+        unitOfWorkMock.Verify(
+            u => u.SaveChangesAsync(
+                It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 
     [Fact]
     public async Task CreateReservationAsync_ShouldThrow_WhenTimeConflictOccurs()
     {
         // Arrange
+
         var now = DateTime.UtcNow;
 
+        var specialistId = Guid.NewGuid();
+
         var existingReservation = new Reservation(
-            Guid.NewGuid(),
+            specialistId,
             Guid.NewGuid(),
             now.AddDays(1),
             now.AddDays(1).AddHours(1));
 
         var repositoryMock = new Mock<IReservationRepository>();
+
         var unitOfWorkMock = CreateUnitOfWorkMock();
+
         repositoryMock
             .Setup(r => r.GetActiveForSpecialistAsync(
                 It.IsAny<Guid>(),
                 It.IsAny<DateTime>(),
-                It.IsAny<DateTime>()))
-            .ReturnsAsync(new List<Reservation> { existingReservation });
+                It.IsAny<DateTime>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync([existingReservation]);
 
         var conflictChecker = new ReservationConflictChecker();
+
         var service = new ReservationService(
             repositoryMock.Object,
             unitOfWorkMock.Object,
             conflictChecker);
 
-        // Act & Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            service.CreateReservationAsync(
-                existingReservation.SpecialistId,
+        // Act + Assert
+
+        await Assert.ThrowsAsync<ReservationConflictException>(
+            () => service.CreateReservationAsync(
+                specialistId,
                 Guid.NewGuid(),
                 now.AddDays(1).AddMinutes(30),
                 now.AddDays(1).AddHours(1).AddMinutes(30)));
 
         repositoryMock.Verify(
-            r => r.AddAsync(It.IsAny<Reservation>()),
+            r => r.AddAsync(
+                It.IsAny<Reservation>(),
+                It.IsAny<CancellationToken>()),
             Times.Never);
-        unitOfWorkMock.Verify(u => u.RollbackAsync(), Times.Once);
+
+        unitOfWorkMock.Verify(
+            u => u.SaveChangesAsync(
+                It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
-    private Mock<IUnitOfWork> CreateUnitOfWorkMock()
+    private static Mock<IUnitOfWork> CreateUnitOfWorkMock()
     {
-        var mock = new Mock<IUnitOfWork>();
+        var transactionMock =
+            new Mock<IDbContextTransaction>();
 
-        mock.Setup(u => u.BeginSerializableTransactionAsync(It.IsAny<CancellationToken>()))
+        transactionMock
+            .Setup(t => t.CommitAsync(It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
-        mock.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()))
+        var unitOfWorkMock =
+            new Mock<IUnitOfWork>();
+
+        unitOfWorkMock
+            .Setup(u => u.BeginSerializableTransactionAsync(
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(transactionMock.Object);
+
+        unitOfWorkMock
+            .Setup(u => u.SaveChangesAsync(
+                It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
-        mock.Setup(u => u.CommitAsync(It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
-
-        mock.Setup(u => u.RollbackAsync())
-            .Returns(Task.CompletedTask);
-
-        return mock;
+        return unitOfWorkMock;
     }
 }

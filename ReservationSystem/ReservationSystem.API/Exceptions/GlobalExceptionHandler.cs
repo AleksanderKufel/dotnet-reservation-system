@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Npgsql;
 using ReservationSystem.Application.Exceptions;
 using System.Net;
 
@@ -24,6 +25,9 @@ public sealed class GlobalExceptionHandler(
 
             ReservationConflictException =>
                 ((int)HttpStatusCode.Conflict, "Reservation conflict"),
+
+            NpgsqlException { SqlState: "40001" } =>
+                ((int)HttpStatusCode.Conflict, "Concurrent booking conflict"),
 
             InvalidOperationException =>
                 ((int)HttpStatusCode.BadRequest, "Business rule violation"),

@@ -28,15 +28,13 @@ public class ReservationService
         DateTime endTime,
         CancellationToken cancellationToken = default)
     {
-        try
+        await using (var transaction = await _unitOfWork.BeginSerializableTransactionAsync(cancellationToken))
         {
-            await _unitOfWork.BeginSerializableTransactionAsync(cancellationToken);
-
             var existingReservations = await _repository.GetActiveForSpecialistAsync(
                 specialistId,
-                startTime,
-                endTime,
-                cancellationToken);
+            startTime,
+            endTime,
+            cancellationToken);
 
             var reservation = new Reservation(
                 specialistId,
@@ -51,12 +49,7 @@ public class ReservationService
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            await _unitOfWork.CommitAsync(cancellationToken);
-        }
-        catch
-        {
-            await _unitOfWork.RollbackAsync();
-            throw;
+            await transaction.CommitAsync(cancellationToken);
         }
     }
 }
