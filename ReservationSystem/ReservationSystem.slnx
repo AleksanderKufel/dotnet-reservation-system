@@ -6,5 +6,6 @@
   <Project Path="ReservationSystem.Application/ReservationSystem.Application.csproj" />
   <Project Path="ReservationSystem.Domain/ReservationSystem.Domain.csproj" />
   <Project Path="ReservationSystem.Infrastructure/ReservationSystem.Infrastructure.csproj" />
+  <Project Path="ReservationSystem.IntegrationTests/ReservationSystem.IntegrationTests.csproj" Id="3487879d-12d3-4818-a8cb-884e7a05378d" />
   <Project Path="ReservationSystem.UnitTests/ReservationSystem.UnitTests.csproj" />
 </Solution>
