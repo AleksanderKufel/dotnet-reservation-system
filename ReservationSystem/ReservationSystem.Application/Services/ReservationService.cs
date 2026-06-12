@@ -1,4 +1,5 @@
-﻿using ReservationSystem.Application.Interfaces;
+﻿using ReservationSystem.Application.Exceptions;
+using ReservationSystem.Application.Interfaces;
 using ReservationSystem.Domain.Entities;
 using ReservationSystem.Domain.Services;
 
@@ -44,7 +45,7 @@ public class ReservationService
                 endTime);
 
             if (_conflictChecker.HasConflict(reservation, existingReservations))
-                throw new InvalidOperationException("Reservation time conflict.");
+                throw new ReservationConflictException("Reservation time conflict.");
 
             await _repository.AddAsync(reservation, cancellationToken);
 
