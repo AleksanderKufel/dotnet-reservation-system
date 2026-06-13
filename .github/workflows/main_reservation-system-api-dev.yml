@@ -15,11 +15,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Show solution
-        run: |
-          find . -type f -name "*.sln"
-          find . -type f -name "*.csproj"
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -27,13 +22,13 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Restore
-        run: dotnet restore ReservationSystem/ReservationSystem.sln
+        run: dotnet restore ReservationSystem/ReservationSystem.slnx
 
       - name: Build
-        run: dotnet build ReservationSystem/ReservationSystem.sln --configuration Release --no-restore
+        run: dotnet build ReservationSystem/ReservationSystem.slnx --configuration Release --no-restore
 
       - name: Test
-        run: dotnet test ReservationSystem/ReservationSystem.sln --configuration Release --no-build
+        run: dotnet test ReservationSystem/ReservationSystem.slnx --configuration Release --no-build
 
       - name: Publish API
         run: dotnet publish ReservationSystem/ReservationSystem.API/ReservationSystem.Api.csproj -c Release -o ${{ github.workspace }}/publish
