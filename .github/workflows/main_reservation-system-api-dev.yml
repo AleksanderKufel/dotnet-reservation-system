@@ -27,8 +27,10 @@ jobs:
       - name: Build
         run: dotnet build ReservationSystem/ReservationSystem.slnx --configuration Release --no-restore
 
-      - name: Test
-        run: dotnet test ReservationSystem/ReservationSystem.slnx --configuration Release --no-build
+      - name: Run unit tests
+        run: dotnet test ReservationSystem/ReservationSystem.UnitTests/ReservationSystem.UnitTests.csproj \
+            --configuration Release \
+            --no-build
 
       - name: Publish API
         run: dotnet publish ReservationSystem/ReservationSystem.API/ReservationSystem.Api.csproj -c Release -o ${{ github.workspace }}/publish
