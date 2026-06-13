@@ -1,11 +1,13 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using ReservationSystem.Domain.Entities;
 using ReservationSystem.Infrastructure.Identity;
 
 namespace ReservationSystem.Infrastructure.Persistence;
 
-public class ReservationDbContext : IdentityDbContext<User>
+public class ReservationDbContext
+    : IdentityDbContext<User, IdentityRole<Guid>, Guid>
 {
     public ReservationDbContext(DbContextOptions<ReservationDbContext> options)
         : base(options)
@@ -16,6 +18,8 @@ public class ReservationDbContext : IdentityDbContext<User>
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+
         modelBuilder.Entity<Reservation>(builder =>
         {
             builder.HasKey(r => r.Id);

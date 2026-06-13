@@ -1,4 +1,5 @@
-﻿using ReservationSystem.Application.Interfaces;
+﻿using ReservationSystem.Application.Exceptions;
+using ReservationSystem.Application.Interfaces;
 using ReservationSystem.Domain.Entities;
 using ReservationSystem.Domain.Services;
 
@@ -27,15 +28,13 @@ public class ReservationService
         DateTime endTime,
         CancellationToken cancellationToken = default)
     {
-        try
+        await using (var transaction = await _unitOfWork.BeginSerializableTransactionAsync(cancellationToken))
         {
-            await _unitOfWork.BeginSerializableTransactionAsync(cancellationToken);
-
             var existingReservations = await _repository.GetActiveForSpecialistAsync(
                 specialistId,
-                startTime,
-                endTime,
-                cancellationToken);
+            startTime,
+            endTime,
+            cancellationToken);
 
             var reservation = new Reservation(
                 specialistId,
@@ -44,18 +43,13 @@ public class ReservationService
                 endTime);
 
             if (_conflictChecker.HasConflict(reservation, existingReservations))
-                throw new InvalidOperationException("Reservation time conflict.");
+                throw new ReservationConflictException("Reservation time conflict.");
 
             await _repository.AddAsync(reservation, cancellationToken);
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            await _unitOfWork.CommitAsync(cancellationToken);
-        }
-        catch
-        {
-            await _unitOfWork.RollbackAsync();
-            throw;
+            await transaction.CommitAsync(cancellationToken);
         }
     }
 }

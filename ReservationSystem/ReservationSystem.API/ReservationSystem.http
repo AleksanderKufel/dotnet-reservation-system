@@ -1,0 +1,35 @@
+@host = http://localhost:5143/api/reservations
+
+
+### Create reservation
+POST {{host}}
+Content-Type: application/json
+
+{
+  "specialistId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "userId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "startTime": "2026a05-20T10:00:00Z",
+  "endTime": "2026-05-20T11:00:00Z"
+}
+
+### Docker
+
+### Login
+POST http://localhost:8080/login
+Content-Type: application/json
+
+{
+  "email": "test@test.com",
+  "password": "String-1"
+}
+
+### Create reservation
+POST http://localhost:8080/api/reservations
+Authorization: Bearer CfDJ8AMJygB0eJhOg-_hO4RiKk_sB9L7UpHINvDP7T7DWoC-CNvQwJOoiK__aSZM3OvRyDbsgLtVT2r1VeF_QIu0pKvhat-GLu9xOow7GTzysuE1T-u-2mZ2crj96X5Qb9luP77yC52aOigh5F5af8XEioXCd3paTN1ZZOl7TyfPff6m3r6XNxUh7fWPU3OZzR4f9r4f8T1i0XJoJ2ahj7RdJZCmDyI_sIxqmcQcn8q35uDf6_Y6vA_XpYEG09Fvcqd7j_iU_TxoTcKLwEOsI6DI6ekAKNZ9Y8qAuXlov2fgEhda67xGLHZu4zeIi6YQkWi6rbhzD48dS5pan8O1ZsWjhiOOBcOiT0_TSARgUN-xcVSUuDbl7CbQcWFLkS0UCSmAd6aLVEBM-9Vv8b54ZODfQRlYtWu24H41RSaSHGUPlY16Vlm3BpgzLJSn3hSCFItpWKHjhJbPqhyJWX4B_COSTVHqBn_sYTEi_a9bFNlYGuALH-hdhxAPTj9eJlJ384mdL5QzPBk1PXDyoLR6Bu6qRYCsmXInlQ24vd2vOZ4i-Dym1QbmO3tBolpvUYDawIZBeZ53scZGEYCbZiYUnAP5V5AVaSwuE3pf9fWIp_tQIx4NfLDzCDwHdKJ0ghUom2-VaWCQSh5AoW2mVhH5Sc_vA3si7WiaFRh58TJJQWNK8VP2MckM99NcoHVL2NrwXzkBxQ
+Content-Type: application/json
+
+{
+  "specialistId": "11111111-1111-1111-1111-111111111111",
+  "startTime": "2026-06-20T10:00:00Z",
+  "endTime": "2026-06-20T11:00:00Z"
+}

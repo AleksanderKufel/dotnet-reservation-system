@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ReservationSystem.Api.Contracts;
 using ReservationSystem.Application.Services;
+using System.Security.Claims;
 
 namespace ReservationSystem.Api.Controllers;
 
@@ -20,10 +21,11 @@ public class ReservationsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create(CreateReservationRequest request, CancellationToken cancellationToken)
     {
-
+        var userId = Guid.Parse(
+            User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         await _reservationService.CreateReservationAsync(
             request.SpecialistId,
-            request.UserId,
+            userId,
             request.StartTime,
             request.EndTime,
             cancellationToken);
