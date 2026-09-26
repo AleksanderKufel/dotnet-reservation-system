@@ -1,7 +1,5 @@
 # Reservation System
 
-[!\[Build and deploy](https://github.com/AleksanderKufel/dotnet-reservation-system/actions/workflows/main_reservation-system-api-dev.yml/badge.svg)](https://github.com/AleksanderKufel/dotnet-reservation-system/actions/workflows/main\_reservation-system-api-dev.yml)
-
 REST API for booking appointments with specialists. The main requirement is that a specialist can't be double-booked, even under concurrent requests.
 
 **Stack:** .NET 10, ASP.NET Core Web API, EF Core, PostgreSQL, ASP.NET Core Identity, FluentValidation, xUnit, Moq, Docker, GitHub Actions, Azure App Service
