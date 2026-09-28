@@ -26,7 +26,7 @@ public sealed class GlobalExceptionHandler(
             ReservationConflictException =>
                 ((int)HttpStatusCode.Conflict, "Reservation conflict"),
 
-            NpgsqlException { SqlState: "40001" } =>
+            _ when IsSerializationFailure(exception) =>
                 ((int)HttpStatusCode.Conflict, "Concurrent booking conflict"),
 
             InvalidOperationException =>
@@ -55,5 +55,17 @@ public sealed class GlobalExceptionHandler(
             cancellationToken);
 
         return true;
+    }
+
+    // EF Core may wrap the PostgreSQL serialization failure (40001) in another exception.
+    private static bool IsSerializationFailure(Exception? exception)
+    {
+        for (; exception is not null; exception = exception.InnerException)
+        {
+            if (exception is NpgsqlException { SqlState: "40001" })
+                return true;
+        }
+
+        return false;
     }
 }

@@ -1,9 +1,7 @@
 name: Build and deploy ASP.Net Core app to Azure Web App - reservation-system-api-dev
 
+# Manual only: the Azure App Service is currently stopped (trial ended).
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 jobs:

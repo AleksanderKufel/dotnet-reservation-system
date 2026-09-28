@@ -1,5 +1,7 @@
 # Reservation System
 
+[![CI](https://github.com/AleksanderKufel/dotnet-reservation-system/actions/workflows/ci.yml/badge.svg)](https://github.com/AleksanderKufel/dotnet-reservation-system/actions/workflows/ci.yml)
+
 REST API for booking appointments with specialists. The main requirement is that a specialist can't be double-booked, even under concurrent requests.
 
 **Stack:** .NET 10, ASP.NET Core Web API, EF Core, PostgreSQL, ASP.NET Core Identity, FluentValidation, xUnit, Moq, Docker, GitHub Actions, Azure App Service
@@ -46,7 +48,7 @@ Checking for overlaps and inserting the reservation run in a single `Serializabl
 
 ## TODO
 
-* Testcontainers for integration tests and running them in CI
+* Testcontainers for integration tests
 * Endpoints for listing and cancelling reservations, specialists and available slots
 * Exclusion constraint in PostgreSQL as an additional safeguard
 * Angular frontend
