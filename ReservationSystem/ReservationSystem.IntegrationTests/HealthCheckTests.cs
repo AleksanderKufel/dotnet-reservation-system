@@ -1,17 +1,15 @@
 ﻿using FluentAssertions;
-using Microsoft.AspNetCore.Mvc.Testing;
 using System.Net;
 
 namespace ReservationSystem.IntegrationTests;
 
+[Collection(IntegrationTestCollection.Name)]
 public class HealthCheckTests
 {
     private readonly HttpClient _client;
 
-    public HealthCheckTests()
+    public HealthCheckTests(ReservationApiFactory factory)
     {
-        var factory = new WebApplicationFactory<Program>();
-
         _client = factory.CreateClient();
     }
 

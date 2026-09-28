@@ -1,19 +1,17 @@
 ﻿using FluentAssertions;
-using Microsoft.AspNetCore.Mvc.Testing;
 using ReservationSystem.Api.Contracts;
 using System.Net;
 using System.Net.Http.Json;
 
 namespace ReservationSystem.IntegrationTests;
 
-[Collection("Reservations")]
+[Collection(IntegrationTestCollection.Name)]
 public class BookingConcurrencyTests
-    : IClassFixture<WebApplicationFactory<Program>>
 {
-    private readonly WebApplicationFactory<Program> _factory;
+    private readonly ReservationApiFactory _factory;
 
     public BookingConcurrencyTests(
-        WebApplicationFactory<Program> factory)
+        ReservationApiFactory factory)
     {
         _factory = factory;
     }
