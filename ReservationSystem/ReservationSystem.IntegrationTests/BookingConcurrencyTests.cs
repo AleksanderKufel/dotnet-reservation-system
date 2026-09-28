@@ -6,21 +6,18 @@ using System.Net.Http.Json;
 namespace ReservationSystem.IntegrationTests;
 
 [Collection(IntegrationTestCollection.Name)]
-public class BookingConcurrencyTests
+public class BookingConcurrencyTests : IntegrationTestBase
 {
-    private readonly ReservationApiFactory _factory;
-
-    public BookingConcurrencyTests(
-        ReservationApiFactory factory)
+    public BookingConcurrencyTests(ReservationApiFactory factory)
+        : base(factory)
     {
-        _factory = factory;
     }
 
     [Fact]
     public async Task Should_Not_Allow_Double_Booking()
     {
-        var client1 = _factory.CreateClient();
-        var client2 = _factory.CreateClient();
+        var client1 = Factory.CreateClient();
+        var client2 = Factory.CreateClient();
 
         await TestAuthHelper.AuthenticateAsync(client1);
         await TestAuthHelper.AuthenticateAsync(client2);

@@ -6,20 +6,17 @@ using System.Net.Http.Json;
 namespace ReservationSystem.IntegrationTests;
 
 [Collection(IntegrationTestCollection.Name)]
-public class ReservationCreationTests
+public class ReservationCreationTests : IntegrationTestBase
 {
-    private readonly ReservationApiFactory _factory;
-
-    public ReservationCreationTests(
-        ReservationApiFactory factory)
+    public ReservationCreationTests(ReservationApiFactory factory)
+        : base(factory)
     {
-        _factory = factory;
     }
 
     [Fact]
     public async Task Create_Reservation_Returns_Created()
     {
-        var client = _factory.CreateClient();
+        var client = Factory.CreateClient();
 
         await TestAuthHelper.AuthenticateAsync(client);
 
