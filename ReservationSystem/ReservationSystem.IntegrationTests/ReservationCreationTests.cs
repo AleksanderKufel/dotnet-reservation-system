@@ -6,6 +6,7 @@ using System.Net.Http.Json;
 
 namespace ReservationSystem.IntegrationTests;
 
+[Collection("Reservations")]
 public class ReservationCreationTests
     : IClassFixture<WebApplicationFactory<Program>>
 {
