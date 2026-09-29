@@ -4,7 +4,7 @@
 
 REST API for booking appointments with specialists. The main requirement is that a specialist can't be double-booked, even under concurrent requests.
 
-**Stack:** .NET 10, ASP.NET Core Web API, EF Core, PostgreSQL, ASP.NET Core Identity, FluentValidation, xUnit, Moq, Docker, GitHub Actions, Azure App Service
+**Stack:** .NET 10, ASP.NET Core Web API, EF Core, PostgreSQL, ASP.NET Core Identity, FluentValidation, xUnit, Moq, Testcontainers, Respawn, Docker, GitHub Actions, Azure App Service
 
 ## Project structure
 
@@ -26,7 +26,7 @@ dotnet ef database update --project ReservationSystem.Infrastructure --startup-p
 
 Swagger: http://localhost:8080/swagger
 
-Tests (integration tests need the database from docker compose):
+Tests (integration tests start their own PostgreSQL container with Testcontainers, so only Docker needs to be running):
 
 ```bash
 dotnet test
@@ -44,11 +44,10 @@ Errors are returned as ProblemDetails. An overlapping or concurrently booked slo
 
 Checking for overlaps and inserting the reservation run in a single `Serializable` transaction. With Read Committed, two requests could both pass the check and both insert. A row lock won't help here, because the conflicting row doesn't exist yet. When PostgreSQL detects the conflict, it aborts one transaction with `40001`, and the API maps that to 409.
 
-`BookingConcurrencyTests` sends two requests for the same slot at the same time and checks that exactly one succeeds. Integration tests use real PostgreSQL instead of the InMemory provider, because the InMemory provider doesn't support transactions.
+`BookingConcurrencyTests` sends two requests for the same slot at the same time and checks that exactly one succeeds. Integration tests use real PostgreSQL instead of the InMemory provider, because the InMemory provider doesn't support transactions. The database is reset with Respawn before each test.
 
 ## TODO
 
-* Testcontainers for integration tests
 * Endpoints for listing and cancelling reservations, specialists and available slots
 * Exclusion constraint in PostgreSQL as an additional safeguard
 * Angular frontend

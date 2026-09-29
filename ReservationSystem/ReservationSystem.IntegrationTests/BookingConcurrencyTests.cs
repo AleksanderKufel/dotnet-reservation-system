@@ -1,28 +1,23 @@
 ﻿using FluentAssertions;
-using Microsoft.AspNetCore.Mvc.Testing;
 using ReservationSystem.Api.Contracts;
 using System.Net;
 using System.Net.Http.Json;
 
 namespace ReservationSystem.IntegrationTests;
 
-[Collection("Reservations")]
-public class BookingConcurrencyTests
-    : IClassFixture<WebApplicationFactory<Program>>
+[Collection(IntegrationTestCollection.Name)]
+public class BookingConcurrencyTests : IntegrationTestBase
 {
-    private readonly WebApplicationFactory<Program> _factory;
-
-    public BookingConcurrencyTests(
-        WebApplicationFactory<Program> factory)
+    public BookingConcurrencyTests(ReservationApiFactory factory)
+        : base(factory)
     {
-        _factory = factory;
     }
 
     [Fact]
     public async Task Should_Not_Allow_Double_Booking()
     {
-        var client1 = _factory.CreateClient();
-        var client2 = _factory.CreateClient();
+        var client1 = Factory.CreateClient();
+        var client2 = Factory.CreateClient();
 
         await TestAuthHelper.AuthenticateAsync(client1);
         await TestAuthHelper.AuthenticateAsync(client2);

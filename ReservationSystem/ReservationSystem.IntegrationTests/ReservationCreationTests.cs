@@ -1,27 +1,22 @@
 ﻿using FluentAssertions;
-using Microsoft.AspNetCore.Mvc.Testing;
 using ReservationSystem.Api.Contracts;
 using System.Net;
 using System.Net.Http.Json;
 
 namespace ReservationSystem.IntegrationTests;
 
-[Collection("Reservations")]
-public class ReservationCreationTests
-    : IClassFixture<WebApplicationFactory<Program>>
+[Collection(IntegrationTestCollection.Name)]
+public class ReservationCreationTests : IntegrationTestBase
 {
-    private readonly WebApplicationFactory<Program> _factory;
-
-    public ReservationCreationTests(
-        WebApplicationFactory<Program> factory)
+    public ReservationCreationTests(ReservationApiFactory factory)
+        : base(factory)
     {
-        _factory = factory;
     }
 
     [Fact]
     public async Task Create_Reservation_Returns_Created()
     {
-        var client = _factory.CreateClient();
+        var client = Factory.CreateClient();
 
         await TestAuthHelper.AuthenticateAsync(client);
 
