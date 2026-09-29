@@ -15,14 +15,30 @@ public class ReservationDbContext
     }
 
     public DbSet<Reservation> Reservations { get; set; }
+    public DbSet<Specialist> Specialists { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
+        modelBuilder.Entity<Specialist>(builder =>
+        {
+            builder.HasKey(s => s.Id);
+
+            builder.Property(s => s.Name).HasMaxLength(100).IsRequired();
+            builder.Property(s => s.Specialization).HasMaxLength(100).IsRequired();
+
+            builder.HasData(SpecialistSeed.All);
+        });
+
         modelBuilder.Entity<Reservation>(builder =>
         {
             builder.HasKey(r => r.Id);
+
+            builder.HasOne<Specialist>()
+                   .WithMany()
+                   .HasForeignKey(r => r.SpecialistId)
+                   .OnDelete(DeleteBehavior.Restrict);
 
             builder.Property(r => r.Status)
                    .HasConversion<int>();

@@ -31,7 +31,8 @@ public sealed class ReservationApiFactory
         {
             DbAdapter = DbAdapter.Postgres,
             SchemasToInclude = ["public"],
-            TablesToIgnore = ["__EFMigrationsHistory"]
+            // Specialists are seed data from migrations, so they are kept between tests.
+            TablesToIgnore = ["__EFMigrationsHistory", "Specialists"]
         });
     }
 

@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using ReservationSystem.Api.Contracts;
+using ReservationSystem.Infrastructure.Persistence;
 using System.Net;
 using System.Net.Http.Json;
 
@@ -24,7 +25,7 @@ public class BookingConcurrencyTests : IntegrationTestBase
 
         var request = new CreateReservationRequest
         {
-            SpecialistId = Guid.NewGuid(),
+            SpecialistId = SpecialistSeed.AnnaNowakId,
             StartTime = DateTime.UtcNow
                 .AddDays(1)
                 .Date

@@ -29,6 +29,8 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
 
+builder.Services.AddScoped<ISpecialistRepository, SpecialistRepository>();
+
 builder.Services
     .AddIdentityApiEndpoints<User>()
     .AddEntityFrameworkStores<ReservationDbContext>();
@@ -44,6 +46,8 @@ builder.Services.AddScoped<ReservationConflictChecker>();
 // ======================================================
 
 builder.Services.AddScoped<ReservationService>();
+
+builder.Services.AddScoped<SpecialistService>();
 
 // ======================================================
 // API / Framework
