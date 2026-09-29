@@ -1,4 +1,5 @@
-﻿using ReservationSystem.Domain.Entities;
+﻿using ReservationSystem.Application.Models;
+using ReservationSystem.Domain.Entities;
 
 namespace ReservationSystem.Application.Interfaces;
 
@@ -11,6 +12,12 @@ public interface IReservationRepository
         CancellationToken cancellationToken = default);
 
     Task<Reservation?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+
+    Task<PagedResult<Reservation>> GetForUserAsync(
+        Guid userId,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default);
 
     Task AddAsync(Reservation reservation, CancellationToken cancellationToken = default);
 }

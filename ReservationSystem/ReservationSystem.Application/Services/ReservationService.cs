@@ -1,5 +1,6 @@
 using ReservationSystem.Application.Exceptions;
 using ReservationSystem.Application.Interfaces;
+using ReservationSystem.Application.Models;
 using ReservationSystem.Domain.Entities;
 using ReservationSystem.Domain.Services;
 
@@ -59,6 +60,15 @@ public class ReservationService
 
             return reservation;
         }
+    }
+
+    public Task<PagedResult<Reservation>> GetPageForUserAsync(
+        Guid userId,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default)
+    {
+        return _repository.GetForUserAsync(userId, page, pageSize, cancellationToken);
     }
 
     public async Task<Reservation> GetForUserAsync(

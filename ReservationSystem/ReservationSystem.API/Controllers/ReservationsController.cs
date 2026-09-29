@@ -36,6 +36,24 @@ public class ReservationsController : ControllerBase
             ReservationResponse.FromDomain(reservation));
     }
 
+    [HttpGet("me")]
+    public async Task<PagedResponse<ReservationResponse>> GetMine(
+        [FromQuery] PaginationQuery query,
+        CancellationToken cancellationToken)
+    {
+        var result = await _reservationService.GetPageForUserAsync(
+            UserId,
+            query.Page,
+            query.PageSize,
+            cancellationToken);
+
+        return new PagedResponse<ReservationResponse>(
+            result.Items.Select(ReservationResponse.FromDomain).ToList(),
+            result.Page,
+            result.PageSize,
+            result.TotalCount);
+    }
+
     [HttpGet("{id:guid}")]
     public async Task<ReservationResponse> GetById(Guid id, CancellationToken cancellationToken)
     {
