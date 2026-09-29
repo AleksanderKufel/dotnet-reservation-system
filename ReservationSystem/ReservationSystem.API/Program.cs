@@ -10,6 +10,7 @@ using ReservationSystem.Domain.Services;
 using ReservationSystem.Infrastructure.Identity;
 using ReservationSystem.Infrastructure.Persistence;
 using ReservationSystem.Infrastructure.Repositories;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -56,7 +57,9 @@ builder.Services.AddScoped<SpecialistService>();
 builder.Services.AddHealthChecks()
     .AddNpgSql(builder.Configuration.GetConnectionString("DefaultConnection"));
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
 builder.Services.AddProblemDetails();
 

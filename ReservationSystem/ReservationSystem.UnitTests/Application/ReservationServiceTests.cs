@@ -31,6 +31,7 @@ public class ReservationServiceTests
 
         var service = new ReservationService(
             repositoryMock.Object,
+            CreateSpecialistRepositoryMock(exists: true).Object,
             unitOfWorkMock.Object,
             conflictChecker);
 
@@ -87,6 +88,7 @@ public class ReservationServiceTests
 
         var service = new ReservationService(
             repositoryMock.Object,
+            CreateSpecialistRepositoryMock(exists: true).Object,
             unitOfWorkMock.Object,
             conflictChecker);
 
@@ -109,6 +111,47 @@ public class ReservationServiceTests
             u => u.SaveChangesAsync(
                 It.IsAny<CancellationToken>()),
             Times.Never);
+    }
+
+    [Fact]
+    public async Task CreateReservationAsync_ShouldThrow_WhenSpecialistDoesNotExist()
+    {
+        // Arrange
+
+        var repositoryMock = new Mock<IReservationRepository>();
+
+        var unitOfWorkMock = CreateUnitOfWorkMock();
+
+        var service = new ReservationService(
+            repositoryMock.Object,
+            CreateSpecialistRepositoryMock(exists: false).Object,
+            unitOfWorkMock.Object,
+            new ReservationConflictChecker());
+
+        // Act + Assert
+
+        await Assert.ThrowsAsync<NotFoundException>(
+            () => service.CreateReservationAsync(
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                DateTime.UtcNow.AddDays(1),
+                DateTime.UtcNow.AddDays(1).AddHours(1)));
+
+        unitOfWorkMock.Verify(
+            u => u.BeginSerializableTransactionAsync(
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    private static Mock<ISpecialistRepository> CreateSpecialistRepositoryMock(bool exists)
+    {
+        var specialistRepositoryMock = new Mock<ISpecialistRepository>();
+
+        specialistRepositoryMock
+            .Setup(r => r.ExistsAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(exists);
+
+        return specialistRepositoryMock;
     }
 
     private static Mock<IUnitOfWork> CreateUnitOfWorkMock()

@@ -30,6 +30,11 @@ public class ReservationRepository : IReservationRepository
             .ToListAsync(cancellationToken);
     }
 
+    public Task<Reservation?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return _dbContext.Reservations.FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
+    }
+
     public async Task AddAsync(Reservation reservation, CancellationToken cancellationToken = default)
     {
         await _dbContext.Reservations.AddAsync(reservation, cancellationToken);

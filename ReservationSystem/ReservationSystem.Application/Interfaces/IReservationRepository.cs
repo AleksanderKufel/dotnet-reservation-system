@@ -10,5 +10,7 @@ public interface IReservationRepository
         DateTime to,
         CancellationToken cancellationToken = default);
 
+    Task<Reservation?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+
     Task AddAsync(Reservation reservation, CancellationToken cancellationToken = default);
 }

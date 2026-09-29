@@ -21,4 +21,9 @@ public class SpecialistRepository : ISpecialistRepository
             .OrderBy(s => s.Name)
             .ToListAsync(cancellationToken);
     }
+
+    public Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return _dbContext.Specialists.AnyAsync(s => s.Id == id, cancellationToken);
+    }
 }

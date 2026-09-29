@@ -23,6 +23,9 @@ public sealed class GlobalExceptionHandler(
             ArgumentException =>
                 ((int)HttpStatusCode.BadRequest, "Invalid request"),
 
+            NotFoundException =>
+                ((int)HttpStatusCode.NotFound, "Not found"),
+
             ReservationConflictException =>
                 ((int)HttpStatusCode.Conflict, "Reservation conflict"),
 
