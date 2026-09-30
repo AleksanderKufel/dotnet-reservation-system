@@ -42,6 +42,8 @@ builder.Services
 
 builder.Services.AddScoped<ReservationConflictChecker>();
 
+builder.Services.AddScoped<AvailableSlotCalculator>();
+
 // ======================================================
 // Application
 // ======================================================

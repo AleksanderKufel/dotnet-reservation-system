@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using ReservationSystem.Api.Contracts;
 using ReservationSystem.Application.Services;
 
@@ -22,6 +23,19 @@ public class SpecialistsController : ControllerBase
 
         return specialists
             .Select(s => new SpecialistResponse(s.Id, s.Name, s.Specialization))
+            .ToList();
+    }
+
+    [HttpGet("{id:guid}/slots")]
+    public async Task<IReadOnlyList<TimeSlotResponse>> GetAvailableSlots(
+        Guid id,
+        [FromQuery, BindRequired] DateOnly date,
+        CancellationToken cancellationToken)
+    {
+        var slots = await _specialistService.GetAvailableSlotsAsync(id, date, cancellationToken);
+
+        return slots
+            .Select(s => new TimeSlotResponse(s.StartTime, s.EndTime))
             .ToList();
     }
 }
