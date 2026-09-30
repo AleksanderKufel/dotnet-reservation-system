@@ -4,13 +4,13 @@
 
 REST API for booking appointments with specialists. The main requirement is that a specialist can't be double-booked, even under concurrent requests.
 
-**Stack:** .NET 10, ASP.NET Core Web API, EF Core, PostgreSQL, ASP.NET Core Identity, FluentValidation, xUnit, Moq, Testcontainers, Respawn, Docker, GitHub Actions, Azure App Service
+**Stack:** .NET 10, ASP.NET Core Web API, EF Core, PostgreSQL, ASP.NET Core Identity, FluentValidation, Microsoft.Extensions.Http.Resilience, xUnit, Moq, Testcontainers, Respawn, WireMock.Net, Docker, GitHub Actions, Azure App Service
 
 ## Project structure
 
 * `Domain` - `Reservation` and `Specialist` entities, cancellation rules, overlap checking, working hours and available slots
 * `Application` - `ReservationService`, `SpecialistService` and repository / unit of work interfaces
-* `Infrastructure` - EF Core, repositories, migrations, Identity store
+* `Infrastructure` - EF Core, repositories, migrations, Identity store, public holidays client
 * `API` - controllers, validation, exception handling (ProblemDetails)
 * `UnitTests`, `IntegrationTests`
 
@@ -45,9 +45,15 @@ dotnet test
 
 Reservation endpoints require a token. Specialists and slots are public.
 
-Working hours are Monday to Friday, 9:00-17:00 UTC, in one-hour slots, and a reservation must match one slot. Three sample specialists are seeded by a migration.
+Working hours are Monday to Friday, 9:00-17:00 UTC, in one-hour slots, and a reservation must match one slot. Polish public holidays are closed. Three sample specialists are seeded by a migration.
 
-Errors are returned as ProblemDetails. An overlapping or concurrently booked slot returns `409 Conflict`, a broken business rule (outside working hours, too late to cancel) returns `400`, and a missing or another user's reservation returns `404`.
+Errors are returned as ProblemDetails. An overlapping or concurrently booked slot returns `409 Conflict`, a broken business rule (outside working hours, public holiday, too late to cancel) returns `400`, a missing or another user's reservation returns `404`, and `503` means public holidays couldn't be loaded.
+
+## Public holidays
+
+Holidays come from the [Nager.Date](https://date.nager.at) API through a typed `HttpClient` with the standard resilience handler (retries with backoff, timeouts, circuit breaker). Holidays for a year are cached in memory for 24 hours. If the API is down and nothing is cached, reservations are rejected with `503` instead of risking a booking on a holiday.
+
+Tests don't call the real API: the client is tested against WireMock.Net, and API tests use a fake holiday provider. One smoke test (`Category=External`) calls the real API; CI skips it and a separate workflow runs it weekly.
 
 ## Double booking
 
