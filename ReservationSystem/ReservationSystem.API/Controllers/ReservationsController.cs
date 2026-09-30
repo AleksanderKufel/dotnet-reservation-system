@@ -54,6 +54,14 @@ public class ReservationsController : ControllerBase
             result.TotalCount);
     }
 
+    [HttpPost("{id:guid}/cancel")]
+    public async Task<ReservationResponse> Cancel(Guid id, CancellationToken cancellationToken)
+    {
+        var reservation = await _reservationService.CancelForUserAsync(id, UserId, cancellationToken);
+
+        return ReservationResponse.FromDomain(reservation);
+    }
+
     [HttpGet("{id:guid}")]
     public async Task<ReservationResponse> GetById(Guid id, CancellationToken cancellationToken)
     {

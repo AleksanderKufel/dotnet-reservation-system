@@ -12,17 +12,22 @@ public class ReservationService
     private readonly ISpecialistRepository _specialistRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ReservationConflictChecker _conflictChecker;
+    private readonly TimeProvider _timeProvider;
+
+    public static readonly TimeSpan CancellationLimit = TimeSpan.FromHours(24);
 
     public ReservationService(
         IReservationRepository repository,
         ISpecialistRepository specialistRepository,
         IUnitOfWork unitOfWork,
-        ReservationConflictChecker conflictChecker)
+        ReservationConflictChecker conflictChecker,
+        TimeProvider timeProvider)
     {
         _repository = repository;
         _specialistRepository = specialistRepository;
         _unitOfWork = unitOfWork;
         _conflictChecker = conflictChecker;
+        _timeProvider = timeProvider;
     }
 
     public async Task<Reservation> CreateReservationAsync(
@@ -69,6 +74,20 @@ public class ReservationService
         CancellationToken cancellationToken = default)
     {
         return _repository.GetForUserAsync(userId, page, pageSize, cancellationToken);
+    }
+
+    public async Task<Reservation> CancelForUserAsync(
+        Guid reservationId,
+        Guid userId,
+        CancellationToken cancellationToken = default)
+    {
+        var reservation = await GetForUserAsync(reservationId, userId, cancellationToken);
+
+        reservation.Cancel(_timeProvider.GetUtcNow().UtcDateTime, CancellationLimit);
+
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return reservation;
     }
 
     public async Task<Reservation> GetForUserAsync(

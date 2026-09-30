@@ -1,4 +1,5 @@
 ﻿using ReservationSystem.Domain.Enums;
+using ReservationSystem.Domain.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -38,10 +39,10 @@ namespace ReservationSystem.Domain.Entities
         public void Cancel(DateTime now, TimeSpan cancellationLimit)
         {
             if (Status != ReservationStatus.Active)
-                throw new InvalidOperationException("Only active reservations can be cancelled.");
+                throw new DomainException("Only active reservations can be cancelled.");
 
             if (StartTime - now < cancellationLimit)
-                throw new InvalidOperationException("Too late to cancel this reservation.");
+                throw new DomainException("Too late to cancel this reservation.");
 
             Status = ReservationStatus.Cancelled;
         }

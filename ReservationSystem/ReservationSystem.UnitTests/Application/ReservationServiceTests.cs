@@ -1,9 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Time.Testing;
 using Moq;
 using ReservationSystem.Application.Exceptions;
 using ReservationSystem.Application.Interfaces;
 using ReservationSystem.Application.Services;
 using ReservationSystem.Domain.Entities;
+using ReservationSystem.Domain.Enums;
+using ReservationSystem.Domain.Exceptions;
 using ReservationSystem.Domain.Services;
 
 namespace ReservationSystem.Tests.Application;
@@ -33,7 +36,8 @@ public class ReservationServiceTests
             repositoryMock.Object,
             CreateSpecialistRepositoryMock(exists: true).Object,
             unitOfWorkMock.Object,
-            conflictChecker);
+            conflictChecker,
+            TimeProvider.System);
 
         // Act
 
@@ -90,7 +94,8 @@ public class ReservationServiceTests
             repositoryMock.Object,
             CreateSpecialistRepositoryMock(exists: true).Object,
             unitOfWorkMock.Object,
-            conflictChecker);
+            conflictChecker,
+            TimeProvider.System);
 
         // Act + Assert
 
@@ -126,7 +131,8 @@ public class ReservationServiceTests
             repositoryMock.Object,
             CreateSpecialistRepositoryMock(exists: false).Object,
             unitOfWorkMock.Object,
-            new ReservationConflictChecker());
+            new ReservationConflictChecker(),
+            TimeProvider.System);
 
         // Act + Assert
 
@@ -141,6 +147,48 @@ public class ReservationServiceTests
             u => u.BeginSerializableTransactionAsync(
                 It.IsAny<CancellationToken>()),
             Times.Never);
+    }
+
+    [Theory]
+    [InlineData(25, ReservationStatus.Cancelled)]
+    [InlineData(23, ReservationStatus.Active)]
+    public async Task CancelForUserAsync_ShouldRespectCancellationLimit(int hoursBeforeStart, ReservationStatus expectedStatus)
+    {
+        // Arrange
+
+        var timeProvider = new FakeTimeProvider(new DateTimeOffset(2030, 1, 10, 8, 0, 0, TimeSpan.Zero));
+
+        var userId = Guid.NewGuid();
+
+        var startTime = timeProvider.GetUtcNow().UtcDateTime.AddHours(hoursBeforeStart);
+
+        var reservation = new Reservation(Guid.NewGuid(), userId, startTime, startTime.AddHours(1));
+
+        var repositoryMock = new Mock<IReservationRepository>();
+
+        repositoryMock
+            .Setup(r => r.GetByIdAsync(reservation.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(reservation);
+
+        var service = new ReservationService(
+            repositoryMock.Object,
+            CreateSpecialistRepositoryMock(exists: true).Object,
+            CreateUnitOfWorkMock().Object,
+            new ReservationConflictChecker(),
+            timeProvider);
+
+        // Act
+
+        var cancel = () => service.CancelForUserAsync(reservation.Id, userId);
+
+        // Assert
+
+        if (expectedStatus == ReservationStatus.Cancelled)
+            await cancel();
+        else
+            await Assert.ThrowsAsync<DomainException>(cancel);
+
+        Assert.Equal(expectedStatus, reservation.Status);
     }
 
     private static Mock<ISpecialistRepository> CreateSpecialistRepositoryMock(bool exists)

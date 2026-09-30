@@ -46,6 +46,8 @@ builder.Services.AddScoped<ReservationConflictChecker>();
 // Application
 // ======================================================
 
+builder.Services.AddSingleton(TimeProvider.System);
+
 builder.Services.AddScoped<ReservationService>();
 
 builder.Services.AddScoped<SpecialistService>();
