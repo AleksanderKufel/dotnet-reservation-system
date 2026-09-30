@@ -2,7 +2,6 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using FluentValidation.Validators;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using ReservationSystem.API.Exceptions;
 using ReservationSystem.API.Validators;
 using ReservationSystem.Application.Interfaces;
@@ -38,18 +37,7 @@ builder.Services
     .AddIdentityApiEndpoints<User>()
     .AddEntityFrameworkStores<ReservationDbContext>();
 
-builder.Services.AddOptions<PublicHolidaysOptions>()
-    .BindConfiguration(PublicHolidaysOptions.SectionName)
-    .ValidateDataAnnotations()
-    .ValidateOnStart();
-
-builder.Services.AddHttpClient<NagerDateClient>((serviceProvider, client) =>
-{
-    var options = serviceProvider.GetRequiredService<IOptions<PublicHolidaysOptions>>().Value;
-    client.BaseAddress = new Uri(options.BaseUrl);
-});
-
-builder.Services.AddScoped<IPublicHolidayProvider, PublicHolidayProvider>();
+builder.Services.AddPublicHolidays(builder.Configuration);
 
 // ======================================================
 // Domain
