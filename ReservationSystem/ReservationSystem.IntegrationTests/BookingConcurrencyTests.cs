@@ -26,14 +26,8 @@ public class BookingConcurrencyTests : IntegrationTestBase
         var request = new CreateReservationRequest
         {
             SpecialistId = SpecialistSeed.AnnaNowakId,
-            StartTime = DateTime.UtcNow
-                .AddDays(1)
-                .Date
-                .AddHours(10),
-            EndTime = DateTime.UtcNow
-                .AddDays(1)
-                .Date
-                .AddHours(11)
+            StartTime = Factory.SlotStart(1, 10),
+            EndTime = Factory.SlotStart(1, 11)
         };
 
         var barrier = new Barrier(2);

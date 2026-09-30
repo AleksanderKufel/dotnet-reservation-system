@@ -2,6 +2,7 @@ using ReservationSystem.Application.Exceptions;
 using ReservationSystem.Application.Interfaces;
 using ReservationSystem.Application.Models;
 using ReservationSystem.Domain.Entities;
+using ReservationSystem.Domain.Exceptions;
 using ReservationSystem.Domain.Services;
 
 namespace ReservationSystem.Application.Services;
@@ -39,6 +40,9 @@ public class ReservationService
     {
         if (!await _specialistRepository.ExistsAsync(specialistId, cancellationToken))
             throw new NotFoundException("Specialist not found.");
+
+        if (!WorkingHours.MatchesSlot(startTime, endTime))
+            throw new DomainException("Reservation must match a one-hour slot within working hours.");
 
         await using (var transaction = await _unitOfWork.BeginSerializableTransactionAsync(cancellationToken))
         {

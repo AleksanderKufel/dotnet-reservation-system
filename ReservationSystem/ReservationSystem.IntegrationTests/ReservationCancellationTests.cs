@@ -22,7 +22,7 @@ public class ReservationCancellationTests : IntegrationTestBase
 
         await TestAuthHelper.AuthenticateAsync(client);
 
-        var reservationId = await CreateReservationAsync(client, DateTime.UtcNow.AddDays(3));
+        var reservationId = await CreateReservationAsync(client, Factory.SlotStart(3, 10));
 
         var response = await client.PostAsync($"/api/reservations/{reservationId}/cancel", null);
 
@@ -40,7 +40,7 @@ public class ReservationCancellationTests : IntegrationTestBase
 
         await TestAuthHelper.AuthenticateAsync(client);
 
-        var reservationId = await CreateReservationAsync(client, DateTime.UtcNow.AddHours(2));
+        var reservationId = await CreateReservationAsync(client, Factory.SlotStart(0, 9));
 
         var response = await client.PostAsync($"/api/reservations/{reservationId}/cancel", null);
 
@@ -56,7 +56,7 @@ public class ReservationCancellationTests : IntegrationTestBase
         await TestAuthHelper.AuthenticateAsync(owner);
         await TestAuthHelper.AuthenticateAsync(otherUser);
 
-        var reservationId = await CreateReservationAsync(owner, DateTime.UtcNow.AddDays(3));
+        var reservationId = await CreateReservationAsync(owner, Factory.SlotStart(3, 10));
 
         var response = await otherUser.PostAsync($"/api/reservations/{reservationId}/cancel", null);
 

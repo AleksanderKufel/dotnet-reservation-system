@@ -21,7 +21,7 @@ public class AvailableSlotsTests : IntegrationTestBase
 
         await TestAuthHelper.AuthenticateAsync(client);
 
-        var date = NextMonday();
+        var date = DateOnly.FromDateTime(Factory.SlotStart(0, 0));
         var reservedStart = date.ToDateTime(new TimeOnly(10, 0), DateTimeKind.Utc);
 
         var createResponse = await client.PostAsJsonAsync("/api/reservations", new CreateReservationRequest
@@ -45,7 +45,7 @@ public class AvailableSlotsTests : IntegrationTestBase
     {
         var client = Factory.CreateClient();
 
-        var response = await client.GetAsync($"/api/specialists/{Guid.NewGuid()}/slots?date={NextMonday():yyyy-MM-dd}");
+        var response = await client.GetAsync($"/api/specialists/{Guid.NewGuid()}/slots?date={DateOnly.FromDateTime(Factory.SlotStart(0, 0)):yyyy-MM-dd}");
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -58,15 +58,5 @@ public class AvailableSlotsTests : IntegrationTestBase
         var response = await client.GetAsync($"/api/specialists/{SpecialistSeed.AnnaNowakId}/slots");
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    private static DateOnly NextMonday()
-    {
-        var date = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(2);
-
-        while (date.DayOfWeek != DayOfWeek.Monday)
-            date = date.AddDays(1);
-
-        return date;
     }
 }

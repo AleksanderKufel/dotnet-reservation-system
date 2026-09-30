@@ -23,12 +23,10 @@ public class MyReservationsTests : IntegrationTestBase
         await TestAuthHelper.AuthenticateAsync(client);
         await TestAuthHelper.AuthenticateAsync(otherUser);
 
-        var tomorrow = DateTime.UtcNow.Date.AddDays(1);
-
-        await CreateReservationAsync(client, tomorrow.AddHours(9));
-        await CreateReservationAsync(client, tomorrow.AddHours(10));
-        await CreateReservationAsync(client, tomorrow.AddHours(11));
-        await CreateReservationAsync(otherUser, tomorrow.AddHours(12));
+        await CreateReservationAsync(client, Factory.SlotStart(1, 9));
+        await CreateReservationAsync(client, Factory.SlotStart(1, 10));
+        await CreateReservationAsync(client, Factory.SlotStart(1, 11));
+        await CreateReservationAsync(otherUser, Factory.SlotStart(1, 12));
 
         var firstPage = await client.GetFromJsonAsync<PagedResponse<ReservationResponse>>(
             "/api/reservations/me?page=1&pageSize=2", TestJson.Options);

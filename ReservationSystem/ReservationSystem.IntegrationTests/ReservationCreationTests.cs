@@ -25,8 +25,8 @@ public class ReservationCreationTests : IntegrationTestBase
         var request = new CreateReservationRequest
         {
             SpecialistId = SpecialistSeed.AnnaNowakId,
-            StartTime = DateTime.UtcNow.AddDays(1),
-            EndTime = DateTime.UtcNow.AddDays(1).AddHours(1)
+            StartTime = Factory.SlotStart(1, 10),
+            EndTime = Factory.SlotStart(1, 11)
         };
 
         var response =
@@ -63,13 +63,32 @@ public class ReservationCreationTests : IntegrationTestBase
         var request = new CreateReservationRequest
         {
             SpecialistId = Guid.NewGuid(),
-            StartTime = DateTime.UtcNow.AddDays(1),
-            EndTime = DateTime.UtcNow.AddDays(1).AddHours(1)
+            StartTime = Factory.SlotStart(1, 10),
+            EndTime = Factory.SlotStart(1, 11)
         };
 
         var response = await client.PostAsJsonAsync("/api/reservations", request);
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task Create_Reservation_On_Weekend_Returns_BadRequest()
+    {
+        var client = Factory.CreateClient();
+
+        await TestAuthHelper.AuthenticateAsync(client);
+
+        var saturday = Factory.SlotStart(5, 10);
+
+        var response = await client.PostAsJsonAsync("/api/reservations", new CreateReservationRequest
+        {
+            SpecialistId = SpecialistSeed.AnnaNowakId,
+            StartTime = saturday,
+            EndTime = saturday.AddHours(1)
+        });
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact]
@@ -84,8 +103,8 @@ public class ReservationCreationTests : IntegrationTestBase
         var response = await owner.PostAsJsonAsync("/api/reservations", new CreateReservationRequest
         {
             SpecialistId = SpecialistSeed.AnnaNowakId,
-            StartTime = DateTime.UtcNow.AddDays(1),
-            EndTime = DateTime.UtcNow.AddDays(1).AddHours(1)
+            StartTime = Factory.SlotStart(1, 10),
+            EndTime = Factory.SlotStart(1, 11)
         });
 
         response.EnsureSuccessStatusCode();
