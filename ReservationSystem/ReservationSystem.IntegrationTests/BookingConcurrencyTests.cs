@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using ReservationSystem.Api.Contracts;
+using ReservationSystem.Infrastructure.Persistence;
 using System.Net;
 using System.Net.Http.Json;
 
@@ -24,15 +25,9 @@ public class BookingConcurrencyTests : IntegrationTestBase
 
         var request = new CreateReservationRequest
         {
-            SpecialistId = Guid.NewGuid(),
-            StartTime = DateTime.UtcNow
-                .AddDays(1)
-                .Date
-                .AddHours(10),
-            EndTime = DateTime.UtcNow
-                .AddDays(1)
-                .Date
-                .AddHours(11)
+            SpecialistId = SpecialistSeed.AnnaNowakId,
+            StartTime = Factory.SlotStart(1, 10),
+            EndTime = Factory.SlotStart(1, 11)
         };
 
         var barrier = new Barrier(2);

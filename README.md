@@ -8,8 +8,8 @@ REST API for booking appointments with specialists. The main requirement is that
 
 ## Project structure
 
-* `Domain` - `Reservation` entity, cancellation rules, overlap checking
-* `Application` - `ReservationService` and repository / unit of work interfaces
+* `Domain` - `Reservation` and `Specialist` entities, cancellation rules, overlap checking, working hours and available slots
+* `Application` - `ReservationService`, `SpecialistService` and repository / unit of work interfaces
 * `Infrastructure` - EF Core, repositories, migrations, Identity store
 * `API` - controllers, validation, exception handling (ProblemDetails)
 * `UnitTests`, `IntegrationTests`
@@ -35,10 +35,19 @@ dotnet test
 ## Endpoints
 
 * `POST /register`, `POST /login` - Identity API endpoints, login returns a bearer token
-* `POST /api/reservations` - create a reservation (requires token)
+* `GET /api/specialists` - list of specialists
+* `GET /api/specialists/{id}/slots?date=2030-01-07` - free one-hour slots on a given day
+* `POST /api/reservations` - create a reservation, returns `201` with a `Location` header
+* `GET /api/reservations/me?page=1&pageSize=10` - current user's reservations, paged
+* `GET /api/reservations/{id}` - a single reservation of the current user
+* `POST /api/reservations/{id}/cancel` - cancel a reservation, allowed up to 24 hours before it starts
 * `GET /health`
 
-Errors are returned as ProblemDetails. An overlapping or concurrently booked slot returns `409 Conflict`.
+Reservation endpoints require a token. Specialists and slots are public.
+
+Working hours are Monday to Friday, 9:00-17:00 UTC, in one-hour slots, and a reservation must match one slot. Three sample specialists are seeded by a migration.
+
+Errors are returned as ProblemDetails. An overlapping or concurrently booked slot returns `409 Conflict`, a broken business rule (outside working hours, too late to cancel) returns `400`, and a missing or another user's reservation returns `404`.
 
 ## Double booking
 
@@ -48,7 +57,6 @@ Checking for overlaps and inserting the reservation run in a single `Serializabl
 
 ## TODO
 
-* Endpoints for listing and cancelling reservations, specialists and available slots
 * Exclusion constraint in PostgreSQL as an additional safeguard
 * Angular frontend
 

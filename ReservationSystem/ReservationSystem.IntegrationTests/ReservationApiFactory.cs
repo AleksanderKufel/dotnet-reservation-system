@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Time.Testing;
 using Npgsql;
 using ReservationSystem.Infrastructure.Persistence;
 using Respawn;
@@ -17,6 +20,12 @@ public sealed class ReservationApiFactory
 
     private Respawner _respawner = default!;
 
+    // Monday 8:00 UTC of next week: before opening, so every slot of that week is in the future.
+    public FakeTimeProvider Clock { get; } = new(StartOfNextWeek());
+
+    public DateTime SlotStart(int daysAfterMonday, int hour) =>
+        Clock.GetUtcNow().UtcDateTime.Date.AddDays(daysAfterMonday).AddHours(hour);
+
     public async Task InitializeAsync()
     {
         await _database.StartAsync();
@@ -31,7 +40,8 @@ public sealed class ReservationApiFactory
         {
             DbAdapter = DbAdapter.Postgres,
             SchemasToInclude = ["public"],
-            TablesToIgnore = ["__EFMigrationsHistory"]
+            // Specialists are seed data from migrations, so they are kept between tests.
+            TablesToIgnore = ["__EFMigrationsHistory", "Specialists"]
         });
     }
 
@@ -47,12 +57,28 @@ public sealed class ReservationApiFactory
         builder.UseSetting(
             "ConnectionStrings:DefaultConnection",
             _database.GetConnectionString());
+
+        builder.ConfigureTestServices(services =>
+        {
+            services.RemoveAll<TimeProvider>();
+            services.AddSingleton<TimeProvider>(Clock);
+        });
     }
 
     async Task IAsyncLifetime.DisposeAsync()
     {
         await base.DisposeAsync();
         await _database.DisposeAsync();
+    }
+
+    private static DateTimeOffset StartOfNextWeek()
+    {
+        var monday = DateTime.UtcNow.Date.AddDays(1);
+
+        while (monday.DayOfWeek != DayOfWeek.Monday)
+            monday = monday.AddDays(1);
+
+        return new DateTimeOffset(monday.AddHours(8), TimeSpan.Zero);
     }
 }
 

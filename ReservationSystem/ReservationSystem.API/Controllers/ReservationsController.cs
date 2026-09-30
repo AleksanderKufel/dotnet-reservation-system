@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ReservationSystem.Api.Contracts;
 using ReservationSystem.Application.Services;
@@ -18,17 +18,55 @@ public class ReservationsController : ControllerBase
         _reservationService = reservationService;
     }
 
+    private Guid UserId => Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
     [HttpPost]
-    public async Task<IActionResult> Create(CreateReservationRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult<ReservationResponse>> Create(CreateReservationRequest request, CancellationToken cancellationToken)
     {
-        var userId = Guid.Parse(
-            User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        await _reservationService.CreateReservationAsync(
+        var reservation = await _reservationService.CreateReservationAsync(
             request.SpecialistId,
-            userId,
+            UserId,
             request.StartTime,
             request.EndTime,
             cancellationToken);
-        return Created(string.Empty, null);
+
+        return CreatedAtAction(
+            nameof(GetById),
+            new { id = reservation.Id },
+            ReservationResponse.FromDomain(reservation));
+    }
+
+    [HttpGet("me")]
+    public async Task<PagedResponse<ReservationResponse>> GetMine(
+        [FromQuery] PaginationQuery query,
+        CancellationToken cancellationToken)
+    {
+        var result = await _reservationService.GetPageForUserAsync(
+            UserId,
+            query.Page,
+            query.PageSize,
+            cancellationToken);
+
+        return new PagedResponse<ReservationResponse>(
+            result.Items.Select(ReservationResponse.FromDomain).ToList(),
+            result.Page,
+            result.PageSize,
+            result.TotalCount);
+    }
+
+    [HttpPost("{id:guid}/cancel")]
+    public async Task<ReservationResponse> Cancel(Guid id, CancellationToken cancellationToken)
+    {
+        var reservation = await _reservationService.CancelForUserAsync(id, UserId, cancellationToken);
+
+        return ReservationResponse.FromDomain(reservation);
+    }
+
+    [HttpGet("{id:guid}")]
+    public async Task<ReservationResponse> GetById(Guid id, CancellationToken cancellationToken)
+    {
+        var reservation = await _reservationService.GetForUserAsync(id, UserId, cancellationToken);
+
+        return ReservationResponse.FromDomain(reservation);
     }
 }

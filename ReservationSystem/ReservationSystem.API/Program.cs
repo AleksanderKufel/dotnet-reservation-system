@@ -10,6 +10,7 @@ using ReservationSystem.Domain.Services;
 using ReservationSystem.Infrastructure.Identity;
 using ReservationSystem.Infrastructure.Persistence;
 using ReservationSystem.Infrastructure.Repositories;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +30,8 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
 
+builder.Services.AddScoped<ISpecialistRepository, SpecialistRepository>();
+
 builder.Services
     .AddIdentityApiEndpoints<User>()
     .AddEntityFrameworkStores<ReservationDbContext>();
@@ -39,11 +42,17 @@ builder.Services
 
 builder.Services.AddScoped<ReservationConflictChecker>();
 
+builder.Services.AddScoped<AvailableSlotCalculator>();
+
 // ======================================================
 // Application
 // ======================================================
 
+builder.Services.AddSingleton(TimeProvider.System);
+
 builder.Services.AddScoped<ReservationService>();
+
+builder.Services.AddScoped<SpecialistService>();
 
 // ======================================================
 // API / Framework
@@ -52,7 +61,9 @@ builder.Services.AddScoped<ReservationService>();
 builder.Services.AddHealthChecks()
     .AddNpgSql(builder.Configuration.GetConnectionString("DefaultConnection"));
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
 builder.Services.AddProblemDetails();
 

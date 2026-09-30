@@ -1,5 +1,6 @@
 ﻿using ReservationSystem.Domain.Entities;
 using ReservationSystem.Domain.Enums;
+using ReservationSystem.Domain.Exceptions;
 using Xunit;
 
 namespace ReservationSystem.Tests.Domain;
@@ -40,7 +41,7 @@ public class ReservationCancellationTests
         var cancellationLimit = TimeSpan.FromHours(24);
 
         // Act & Assert
-        Assert.Throws<InvalidOperationException>(() =>
+        Assert.Throws<DomainException>(() =>
             reservation.Cancel(now, cancellationLimit));
     }
 }

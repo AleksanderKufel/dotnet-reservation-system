@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Npgsql;
 using ReservationSystem.Application.Exceptions;
+using ReservationSystem.Domain.Exceptions;
 using System.Net;
 
 namespace ReservationSystem.API.Exceptions;
@@ -23,13 +24,16 @@ public sealed class GlobalExceptionHandler(
             ArgumentException =>
                 ((int)HttpStatusCode.BadRequest, "Invalid request"),
 
+            NotFoundException =>
+                ((int)HttpStatusCode.NotFound, "Not found"),
+
             ReservationConflictException =>
                 ((int)HttpStatusCode.Conflict, "Reservation conflict"),
 
             _ when IsSerializationFailure(exception) =>
                 ((int)HttpStatusCode.Conflict, "Concurrent booking conflict"),
 
-            InvalidOperationException =>
+            DomainException =>
                 ((int)HttpStatusCode.BadRequest, "Business rule violation"),
 
             _ =>
