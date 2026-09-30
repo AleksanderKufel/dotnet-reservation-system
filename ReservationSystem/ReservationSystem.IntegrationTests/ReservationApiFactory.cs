@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Time.Testing;
 using Npgsql;
+using ReservationSystem.Application.Interfaces;
 using ReservationSystem.Infrastructure.Persistence;
 using Respawn;
 using Testcontainers.PostgreSql;
@@ -22,6 +23,8 @@ public sealed class ReservationApiFactory
 
     // Monday 8:00 UTC of next week: before opening, so every slot of that week is in the future.
     public FakeTimeProvider Clock { get; } = new(StartOfNextWeek());
+
+    public FakePublicHolidayProvider PublicHolidays { get; } = new();
 
     public DateTime SlotStart(int daysAfterMonday, int hour) =>
         Clock.GetUtcNow().UtcDateTime.Date.AddDays(daysAfterMonday).AddHours(hour);
@@ -62,6 +65,9 @@ public sealed class ReservationApiFactory
         {
             services.RemoveAll<TimeProvider>();
             services.AddSingleton<TimeProvider>(Clock);
+
+            services.RemoveAll<IPublicHolidayProvider>();
+            services.AddSingleton<IPublicHolidayProvider>(PublicHolidays);
         });
     }
 
