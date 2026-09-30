@@ -36,6 +36,9 @@ public sealed class GlobalExceptionHandler(
             DomainException =>
                 ((int)HttpStatusCode.BadRequest, "Business rule violation"),
 
+            PublicHolidaysUnavailableException =>
+                ((int)HttpStatusCode.ServiceUnavailable, "Service unavailable"),
+
             _ =>
                 ((int)HttpStatusCode.InternalServerError, "Internal server error")
         };
@@ -44,7 +47,7 @@ public sealed class GlobalExceptionHandler(
         {
             Status = statusCode,
             Title = title,
-            Detail = statusCode >= 500 && !environment.IsDevelopment()
+            Detail = statusCode == (int)HttpStatusCode.InternalServerError && !environment.IsDevelopment()
                 ? "An unexpected error occurred."
                 : exception.Message
         };

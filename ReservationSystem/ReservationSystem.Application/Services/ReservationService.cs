@@ -13,6 +13,7 @@ public class ReservationService
     private readonly ISpecialistRepository _specialistRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ReservationConflictChecker _conflictChecker;
+    private readonly IPublicHolidayProvider _publicHolidayProvider;
     private readonly TimeProvider _timeProvider;
 
     public static readonly TimeSpan CancellationLimit = TimeSpan.FromHours(24);
@@ -22,12 +23,14 @@ public class ReservationService
         ISpecialistRepository specialistRepository,
         IUnitOfWork unitOfWork,
         ReservationConflictChecker conflictChecker,
+        IPublicHolidayProvider publicHolidayProvider,
         TimeProvider timeProvider)
     {
         _repository = repository;
         _specialistRepository = specialistRepository;
         _unitOfWork = unitOfWork;
         _conflictChecker = conflictChecker;
+        _publicHolidayProvider = publicHolidayProvider;
         _timeProvider = timeProvider;
     }
 
@@ -43,6 +46,9 @@ public class ReservationService
 
         if (!WorkingHours.MatchesSlot(startTime, endTime))
             throw new DomainException("Reservation must match a one-hour slot within working hours.");
+
+        if (await _publicHolidayProvider.IsPublicHolidayAsync(DateOnly.FromDateTime(startTime), cancellationToken))
+            throw new DomainException("Reservations are not available on public holidays.");
 
         await using (var transaction = await _unitOfWork.BeginSerializableTransactionAsync(cancellationToken))
         {

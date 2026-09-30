@@ -10,17 +10,20 @@ public class SpecialistService
     private readonly ISpecialistRepository _repository;
     private readonly IReservationRepository _reservationRepository;
     private readonly AvailableSlotCalculator _slotCalculator;
+    private readonly IPublicHolidayProvider _publicHolidayProvider;
     private readonly TimeProvider _timeProvider;
 
     public SpecialistService(
         ISpecialistRepository repository,
         IReservationRepository reservationRepository,
         AvailableSlotCalculator slotCalculator,
+        IPublicHolidayProvider publicHolidayProvider,
         TimeProvider timeProvider)
     {
         _repository = repository;
         _reservationRepository = reservationRepository;
         _slotCalculator = slotCalculator;
+        _publicHolidayProvider = publicHolidayProvider;
         _timeProvider = timeProvider;
     }
 
@@ -36,6 +39,9 @@ public class SpecialistService
     {
         if (!await _repository.ExistsAsync(specialistId, cancellationToken))
             throw new NotFoundException("Specialist not found.");
+
+        if (await _publicHolidayProvider.IsPublicHolidayAsync(date, cancellationToken))
+            return [];
 
         var dayStart = date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
 

@@ -1,0 +1,30 @@
+name: External API smoke tests
+
+# Checks that the real date.nager.at API still works with our client.
+# Runs separately from CI, so an outage of an external service doesn't block pull requests.
+on:
+  schedule:
+    - cron: '0 6 * * 1' # every Monday at 6:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke-tests:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ReservationSystem
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Run external API tests
+        run: dotnet test ReservationSystem.IntegrationTests --configuration Release --filter "Category=External"

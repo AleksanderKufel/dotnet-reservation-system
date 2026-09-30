@@ -9,6 +9,7 @@ using ReservationSystem.Application.Services;
 using ReservationSystem.Domain.Services;
 using ReservationSystem.Infrastructure.Identity;
 using ReservationSystem.Infrastructure.Persistence;
+using ReservationSystem.Infrastructure.PublicHolidays;
 using ReservationSystem.Infrastructure.Repositories;
 using System.Text.Json.Serialization;
 
@@ -35,6 +36,8 @@ builder.Services.AddScoped<ISpecialistRepository, SpecialistRepository>();
 builder.Services
     .AddIdentityApiEndpoints<User>()
     .AddEntityFrameworkStores<ReservationDbContext>();
+
+builder.Services.AddPublicHolidays(builder.Configuration);
 
 // ======================================================
 // Domain

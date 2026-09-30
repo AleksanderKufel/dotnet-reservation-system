@@ -42,6 +42,7 @@ public class ReservationServiceTests
             CreateSpecialistRepositoryMock(exists: true).Object,
             unitOfWorkMock.Object,
             conflictChecker,
+            CreatePublicHolidayProviderMock(isHoliday: false).Object,
             TimeProvider.System);
 
         // Act
@@ -98,6 +99,7 @@ public class ReservationServiceTests
             CreateSpecialistRepositoryMock(exists: true).Object,
             unitOfWorkMock.Object,
             conflictChecker,
+            CreatePublicHolidayProviderMock(isHoliday: false).Object,
             TimeProvider.System);
 
         // Act + Assert
@@ -135,6 +137,7 @@ public class ReservationServiceTests
             CreateSpecialistRepositoryMock(exists: false).Object,
             unitOfWorkMock.Object,
             new ReservationConflictChecker(),
+            CreatePublicHolidayProviderMock(isHoliday: false).Object,
             TimeProvider.System);
 
         // Act + Assert
@@ -170,6 +173,7 @@ public class ReservationServiceTests
             CreateSpecialistRepositoryMock(exists: true).Object,
             unitOfWorkMock.Object,
             new ReservationConflictChecker(),
+            CreatePublicHolidayProviderMock(isHoliday: false).Object,
             TimeProvider.System);
 
         var startTime = Monday.AddDays(daysAfterMonday).AddHours(hour).AddMinutes(minute);
@@ -182,6 +186,36 @@ public class ReservationServiceTests
                 Guid.NewGuid(),
                 startTime,
                 startTime.AddMinutes(lengthMinutes)));
+
+        unitOfWorkMock.Verify(
+            u => u.BeginSerializableTransactionAsync(
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    [Fact]
+    public async Task CreateReservationAsync_ShouldThrow_OnPublicHoliday()
+    {
+        // Arrange
+
+        var unitOfWorkMock = CreateUnitOfWorkMock();
+
+        var service = new ReservationService(
+            new Mock<IReservationRepository>().Object,
+            CreateSpecialistRepositoryMock(exists: true).Object,
+            unitOfWorkMock.Object,
+            new ReservationConflictChecker(),
+            CreatePublicHolidayProviderMock(isHoliday: true).Object,
+            TimeProvider.System);
+
+        // Act + Assert
+
+        await Assert.ThrowsAsync<DomainException>(
+            () => service.CreateReservationAsync(
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                SlotStart,
+                SlotStart.AddHours(1)));
 
         unitOfWorkMock.Verify(
             u => u.BeginSerializableTransactionAsync(
@@ -241,9 +275,21 @@ public class ReservationServiceTests
             CreateSpecialistRepositoryMock(exists: true).Object,
             CreateUnitOfWorkMock().Object,
             new ReservationConflictChecker(),
+            CreatePublicHolidayProviderMock(isHoliday: false).Object,
             new FakeTimeProvider(new DateTimeOffset(now)));
 
         return (service, reservation);
+    }
+
+    private static Mock<IPublicHolidayProvider> CreatePublicHolidayProviderMock(bool isHoliday)
+    {
+        var publicHolidayProviderMock = new Mock<IPublicHolidayProvider>();
+
+        publicHolidayProviderMock
+            .Setup(p => p.IsPublicHolidayAsync(It.IsAny<DateOnly>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(isHoliday);
+
+        return publicHolidayProviderMock;
     }
 
     private static Mock<ISpecialistRepository> CreateSpecialistRepositoryMock(bool exists)
